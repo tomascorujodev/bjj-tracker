@@ -1,29 +1,21 @@
 import Link from "next/link";
-import { isMockMode } from "@/lib/config";
-import { devBypassRole } from "@/lib/config";
+import { isMockMode, devBypassRole } from "@/lib/config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoginForm } from "./login-form";
+import { RegisterForm } from "./register-form";
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ next?: string }>;
-}) {
-  const { next } = await searchParams;
-
-  // Sin Supabase real (o con bypass de dev) el login no aplica.
+export default async function RegistroPage() {
+  // Sin Supabase real (o con bypass de dev) el registro no aplica.
   if (isMockMode() || devBypassRole()) {
     return (
       <main className="flex flex-1 items-center justify-center p-8">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Login deshabilitado en dev</CardTitle>
+            <CardTitle>Registro deshabilitado en dev</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground space-y-3 text-sm">
             <p>
               Estás en modo desarrollo (mock o <code>DEV_BYPASS_ROLE</code>). El
-              login con email/contraseña requiere un proyecto Supabase real y
-              quitar el bypass.
+              registro con email/contraseña requiere un proyecto Supabase real.
             </p>
             <Link href="/" className="underline">
               ← Volver al inicio
@@ -40,19 +32,19 @@ export default async function LoginPage({
         <div className="space-y-1 text-center">
           <h1 className="text-2xl font-bold tracking-tight">BJJ Tracker</h1>
           <p className="text-muted-foreground text-sm">
-            Ingresá para gestionar tu academia
+            Creá tu cuenta de alumno
           </p>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Iniciar sesión</CardTitle>
+            <CardTitle>Inscribirme</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <LoginForm next={next ?? ""} />
+            <RegisterForm />
             <p className="text-muted-foreground text-center text-sm">
-              ¿Sos alumno nuevo?{" "}
-              <Link href="/registro" className="text-foreground underline">
-                Inscribite
+              ¿Ya tenés cuenta?{" "}
+              <Link href="/login" className="text-foreground underline">
+                Iniciá sesión
               </Link>
             </p>
           </CardContent>

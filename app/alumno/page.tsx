@@ -1,5 +1,8 @@
+import Link from "next/link";
+import { CalendarDays, QrCode } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
+import { Button } from "@/components/ui/button";
 import { isMockMode } from "@/lib/config";
 import { getStudent, firstStudentId } from "@/lib/data/students";
 import { getProgress } from "@/lib/data/progress";
@@ -77,6 +80,10 @@ export default async function AlumnoPage() {
             {BELT_LABEL[student.cinturon_actual]}
           </Badge>
         </div>
+
+        <Button size="lg" className="h-14 w-full text-lg" render={<Link href="/checkin" />}>
+          <QrCode className="size-5" /> Hacer check-in
+        </Button>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Stat label="Clases que cuentan" value={contadas} />
@@ -178,7 +185,12 @@ function Shell({
     <div className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-6 py-8">
       <div className="flex items-center justify-between gap-4">
         <span className="text-muted-foreground text-sm">{email}</span>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" render={<Link href="/eventos" />}>
+            <CalendarDays className="size-3.5" /> Eventos
+          </Button>
+          <LogoutButton />
+        </div>
       </div>
       {demo ? (
         <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">

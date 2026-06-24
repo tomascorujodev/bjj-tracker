@@ -1,136 +1,241 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
+import { Camera, Check, QrCode, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BELT_LABEL, BELT_CLASS } from "@/lib/belts";
 import { cn } from "@/lib/utils";
 import type { CheckInResult } from "@/lib/supabase/types";
-import { checkInAction } from "./actions";
+import type { EligibleClass } from "@/lib/data/checkin";
+import { eligibleClassesAction, checkInScanAction } from "./actions";
 
-type Tipo = { id: string; nombre: string };
+type Phase = "idle" | "scanning" | "choosing" | "done" | "error";
 
-export function CheckinClient({
-  academyToken,
-  academyName,
-  tipos,
-}: {
-  academyToken: string;
-  academyName: string;
-  tipos: Tipo[];
-}) {
-  const [dni, setDni] = useState("");
-  const [tipo, setTipo] = useState(tipos.length === 1 ? tipos[0].id : "");
+// El QR puede contener el token crudo o una URL con ?academy=TOKEN. Sacamos el token.
+function extractToken(text: string): string {
+  const t = text.trim();
+  try {
+    const url = new URL(t);
+    const a = url.searchParams.get("academy");
+    if (a) return a.trim();
+  } catch {
+    // no era una URL
+  }
+  return t;
+}
+
+export function CheckinClient() {
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [token, setToken] = useState("");
+  const [choices, setChoices] = useState<EligibleClass[]>([]);
   const [result, setResult] = useState<CheckInResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function reset() {
+    setPhase("idle");
+    setToken("");
+    setChoices([]);
     setResult(null);
-    setDni("");
-    if (tipos.length !== 1) setTipo("");
+    setError(null);
   }
 
-  function press(d: string) {
-    setDni((v) => (v.length < 10 ? v + d : v));
+  function fail(msg: string) {
+    setError(msg);
+    setPhase("error");
   }
 
-  function submit() {
+  function doCheckin(tkn: string, classTypeId: string) {
     startTransition(async () => {
-      const res = await checkInAction(academyToken, dni, tipo);
+      const res = await checkInScanAction(tkn, classTypeId);
       if (res.ok) {
         setResult(res.result);
+        setPhase("done");
       } else {
-        toast.error(res.error);
+        fail(res.error);
       }
     });
   }
 
-  if (result) {
-    return (
-      <Confirmacion result={result} onNext={reset} />
-    );
+  function onScan(text: string) {
+    const tkn = extractToken(text);
+    setToken(tkn);
+    startTransition(async () => {
+      const res = await eligibleClassesAction(tkn);
+      if (!res.ok) {
+        fail(res.error);
+        return;
+      }
+      if (res.clases.length === 0) {
+        fail(
+          "No hay ninguna clase por empezar ahora. Si llegaste tarde, pedile al profe que te cargue la asistencia.",
+        );
+        return;
+      }
+      if (res.clases.length === 1) {
+        doCheckin(tkn, res.clases[0].id);
+        return;
+      }
+      setChoices(res.clases);
+      setPhase("choosing");
+    });
   }
 
-  const dniOk = /^\d{6,10}$/.test(dni);
+  if (phase === "done" && result) {
+    return <Confirmacion result={result} onNext={reset} />;
+  }
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 p-6">
-      <header className="text-center">
-        <h1 className="text-2xl font-bold">{academyName}</h1>
-        <p className="text-muted-foreground">Registrá tu asistencia</p>
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 p-6">
+      <header className="space-y-1 text-center">
+        <div className="text-muted-foreground inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
+          <span className="bg-chart-3 size-1.5 rounded-full" />
+          Check-in
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight">Marcá tu asistencia</h1>
+        <p className="text-muted-foreground">
+          Escaneá el QR de la academia para registrarte.
+        </p>
       </header>
 
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Tipo de clase</p>
-        <div className="flex flex-wrap gap-2">
-          {tipos.map((t) => (
-            <Button
-              key={t.id}
-              type="button"
-              variant={tipo === t.id ? "default" : "outline"}
-              onClick={() => setTipo(t.id)}
-              className="flex-1"
-            >
-              {t.nombre}
-            </Button>
-          ))}
+      {phase === "idle" && (
+        <div className="bg-card flex flex-col items-center gap-4 rounded-xl border p-8 text-center">
+          <div className="bg-muted text-muted-foreground flex size-20 items-center justify-center rounded-full">
+            <QrCode className="size-10" />
+          </div>
+          <p className="text-muted-foreground text-sm">
+            Vas a necesitar permitir el acceso a la cámara.
+          </p>
+          <Button size="lg" className="h-14 w-full text-lg" onClick={() => setPhase("scanning")}>
+            <Camera className="size-5" /> Escanear QR
+          </Button>
         </div>
-      </div>
+      )}
 
-      <div className="space-y-3">
-        <p className="text-sm font-medium">Tu DNI</p>
-        <div className="flex h-14 items-center justify-center rounded-lg border text-3xl font-mono tracking-widest">
-          {dni || <span className="text-muted-foreground">—</span>}
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
+      {phase === "scanning" && (
+        <Scanner
+          onScan={onScan}
+          onCancel={reset}
+          onError={fail}
+          busy={pending}
+        />
+      )}
+
+      {phase === "choosing" && (
+        <div className="space-y-3">
+          <p className="text-muted-foreground text-center text-sm">
+            Hay varias clases ahora. Elegí a cuál estás entrando:
+          </p>
+          {choices.map((c) => (
             <Button
-              key={d}
-              type="button"
+              key={c.id}
+              size="lg"
               variant="outline"
-              className="h-14 text-xl"
-              onClick={() => press(d)}
+              className="h-14 w-full justify-between text-base"
+              disabled={pending}
+              onClick={() => doCheckin(token, c.id)}
             >
-              {d}
+              <span>{c.nombre}</span>
+              <span className="text-muted-foreground text-sm">
+                {c.hora_inicio.slice(0, 5)}
+              </span>
             </Button>
           ))}
-          <Button
-            type="button"
-            variant="outline"
-            className="h-14 text-xl"
-            onClick={() => setDni((v) => v.slice(0, -1))}
-          >
-            ⌫
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-14 text-xl"
-            onClick={() => press("0")}
-          >
-            0
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-14 text-sm"
-            onClick={() => setDni("")}
-          >
-            Borrar
+          <Button variant="ghost" className="w-full" onClick={reset}>
+            Cancelar
           </Button>
         </div>
-      </div>
+      )}
 
-      <Button
-        size="lg"
-        className="h-14 text-lg"
-        disabled={!dniOk || !tipo || pending}
-        onClick={submit}
-      >
-        {pending ? "Registrando…" : "Registrar asistencia"}
-      </Button>
+      {phase === "error" && (
+        <div className="bg-card flex flex-col items-center gap-4 rounded-xl border p-8 text-center">
+          <div className="bg-destructive/10 text-destructive flex size-16 items-center justify-center rounded-full">
+            <RotateCcw className="size-8" />
+          </div>
+          <p className="text-sm">{error}</p>
+          <Button size="lg" className="h-14 w-full text-lg" onClick={reset}>
+            Reintentar
+          </Button>
+        </div>
+      )}
     </main>
+  );
+}
+
+function Scanner({
+  onScan,
+  onCancel,
+  onError,
+  busy,
+}: {
+  onScan: (text: string) => void;
+  onCancel: () => void;
+  onError: (msg: string) => void;
+  busy: boolean;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const controlsRef = useRef<IScannerControls | null>(null);
+  const doneRef = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const reader = new BrowserQRCodeReader();
+
+    (async () => {
+      try {
+        const controls = await reader.decodeFromConstraints(
+          { video: { facingMode: "environment" } },
+          videoRef.current!,
+          (res, _err, ctrl) => {
+            if (res && !doneRef.current) {
+              doneRef.current = true;
+              ctrl.stop();
+              onScan(res.getText());
+            }
+          },
+        );
+        if (cancelled) controls.stop();
+        else controlsRef.current = controls;
+      } catch {
+        if (!cancelled)
+          onError(
+            "No pudimos abrir la cámara. Revisá los permisos del navegador e intentá de nuevo.",
+          );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controlsRef.current?.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-muted relative aspect-square w-full overflow-hidden rounded-xl border">
+        <video
+          ref={videoRef}
+          className="size-full object-cover"
+          muted
+          playsInline
+        />
+        <div className="pointer-events-none absolute inset-8 rounded-lg border-2 border-white/70" />
+        {busy && (
+          <div className="bg-background/60 absolute inset-0 flex items-center justify-center text-sm">
+            Registrando…
+          </div>
+        )}
+      </div>
+      <p className="text-muted-foreground text-center text-sm">
+        Apuntá al QR pegado en la entrada.
+      </p>
+      <Button variant="ghost" className="w-full" onClick={onCancel}>
+        Cancelar
+      </Button>
+    </div>
   );
 }
 
@@ -141,12 +246,6 @@ function Confirmacion({
   result: CheckInResult;
   onNext: () => void;
 }) {
-  // Auto-reset para el siguiente alumno.
-  useEffect(() => {
-    const t = setTimeout(onNext, 8000);
-    return () => clearTimeout(t);
-  }, [onNext]);
-
   const requeridas = result.clases_requeridas;
   const pct =
     requeridas && requeridas > 0
@@ -155,8 +254,8 @@ function Confirmacion({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
-      <div className="flex size-16 items-center justify-center rounded-full bg-green-600 text-3xl text-white">
-        ✓
+      <div className="bg-chart-3/15 text-chart-3 ring-chart-3/30 flex size-20 items-center justify-center rounded-full ring-8">
+        <Check className="size-10" strokeWidth={3} />
       </div>
       <div>
         <h1 className="text-3xl font-bold">¡Listo, {result.nombre}!</h1>
@@ -197,7 +296,7 @@ function Confirmacion({
       </div>
 
       <Button size="lg" className="h-14 w-full text-lg" onClick={onNext}>
-        Otro alumno
+        Volver al inicio
       </Button>
     </main>
   );

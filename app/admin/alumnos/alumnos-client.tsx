@@ -84,7 +84,7 @@ function StudentForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="cinturon_actual">Cinturón</Label>
-        <Select name="cinturon_actual" defaultValue={student?.cinturon_actual ?? "blanca"}>
+        <Select name="cinturon_actual" defaultValue={student?.cinturon_actual ?? "blanco"}>
           <SelectTrigger id="cinturon_actual" className="w-full">
             <SelectValue>
               {(value: unknown) =>

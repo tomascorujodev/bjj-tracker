@@ -311,7 +311,7 @@ supabase/                  Migraciones SQL (01..04)
 - `attendance` — `student_id`, `class_type_id`, `fecha`, `hora`, `registrado_por` (null = auto check-in del kiosko)
 - `users` — `id` (= `auth.users.id`), `rol` (admin/profesor/alumno), `student_id` (nullable), `email`
 
-**Enums:** `belt_color` (blanca, azul, violeta, marron, negra) · `user_rol` (admin, profesor, alumno)
+**Enums:** `belt_color` (blanco, azul, violeta, marron, negro) · `user_rol` (admin, profesor, alumno)
 
 **Funciones / vistas**
 

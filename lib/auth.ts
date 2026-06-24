@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { devBypassRole } from "@/lib/config";
-import type { UserRol } from "@/lib/supabase/types";
+import type { UserRol, UserEstado } from "@/lib/supabase/types";
 
 export type CurrentUser = {
   id: string;
   email: string;
   rol: UserRol;
+  estado: UserEstado;
   studentId: string | null;
 };
 
@@ -19,6 +20,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       id: "dev-bypass",
       email: `dev-${bypass}@local`,
       rol: bypass,
+      estado: "activo",
       studentId: null,
     };
   }
@@ -31,7 +33,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("rol, student_id, email")
+    .select("rol, estado, student_id, email")
     .eq("id", user.id)
     .single();
   if (!profile) return null;
@@ -40,6 +42,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     id: user.id,
     email: profile.email,
     rol: profile.rol,
+    estado: profile.estado,
     studentId: profile.student_id,
   };
 }
@@ -49,6 +52,8 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function requireRole(...roles: UserRol[]): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  // Alumno aún no aprobado (o rechazado): no accede a ninguna funcionalidad.
+  if (user.rol === "alumno" && user.estado !== "activo") redirect("/pendiente");
   if (roles.length > 0 && !roles.includes(user.rol)) redirect("/");
   return user;
 }

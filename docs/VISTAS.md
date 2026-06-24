@@ -9,7 +9,6 @@ Mockups (wireframes en texto) de cada pantalla + diagramas de navegación y del 
 ```mermaid
 flowchart TD
   Home["/ (landing)"]
-  Home --> Checkin["/checkin\n(público, sin login)"]
   Home --> Login["/login"]
 
   Login -->|rol admin| Admin["/admin"]
@@ -18,31 +17,42 @@ flowchart TD
 
   Admin --> Alumnos["/admin/alumnos"]
   Admin --> Clases["/admin/clases"]
+  Admin --> Horarios["/admin/horarios"]
   Admin --> Cinturones["/admin/cinturones"]
+  Admin --> Eventos["/admin/eventos"]
   Admin --> QR["/admin/qr"]
 
-  Protegidas["/admin · /profesor · /alumno"] -.sin sesión.-> Login
+  Alumno --> Checkin["/checkin\n(escaneo, alumno logueado)"]
+
+  Protegidas["/admin · /profesor · /alumno · /checkin · /eventos"] -.sin sesión.-> Login
 ```
 
-> `/admin`, `/profesor` y `/alumno` están protegidas: sin sesión, el proxy redirige a `/login?next=...`. `/checkin` y `/` son públicas.
+> Solo `/` y `/login` son públicas. `/checkin` ahora **requiere sesión de alumno**: el alumno
+> escanea el QR de la academia desde su celular. Ver el flujo completo en
+> [CHECKIN-FLUJO.md](CHECKIN-FLUJO.md).
 
 ---
 
-## Flujo de check-in (kiosko)
+## Flujo de check-in (escaneo del alumno logueado)
 
 ```mermaid
 flowchart TD
-  A[Alumno escanea el QR de la entrada] --> B["Abre /checkin?academy=TOKEN"]
-  B --> C{Token de academia válido?}
-  C -- No --> E[Pantalla: 'QR inválido']
-  C -- Sí --> D[Elegir tipo de clase + ingresar DNI]
-  D --> F["Server Action -> RPC check_in()"]
-  F --> G{DNI existe y tipo válido?}
-  G -- No --> H[Toast de error\nse mantiene en el pad]
-  G -- Sí --> I[Inserta asistencia]
-  I --> J[Pantalla de confirmación:\nnombre + cinturón + progreso]
-  J -->|'Otro alumno' o auto-reset 8s| D
+  A[Alumno logueado abre /checkin] --> B[Toca 'Escanear QR' -> abre cámara]
+  B --> C[Escanea el QR de la academia]
+  C --> D["Server Action -> RPC eligible_classes_now()"]
+  D --> E{Clases vigentes ahora?}
+  E -- 0 --> F[Aviso: 'No hay clase ahora o ya empezó']
+  E -- varias --> G[El alumno elige cuál]
+  E -- 1 --> H["RPC check_in_scan()"]
+  G --> H
+  H --> I{Ventana OK + sin duplicado?}
+  I -- No --> J[Pantalla de error -> Reintentar]
+  I -- Sí --> K[Inserta asistencia]
+  K --> L[Confirmación: nombre + cinturón + progreso]
 ```
+
+> Ventana de check-in: desde 30 min antes del inicio hasta la hora de inicio (si la clase
+> ya empezó, no se puede). La clase vigente se resuelve con la grilla de `/admin/horarios`.
 
 ---
 
@@ -127,7 +137,7 @@ flowchart TD
 │ │ Nombre       DNI       Cinturón  Desde   …│ │
 │ │ Juan Pérez   30111222  [Azul]    2022-03  │ │
 │ │                         [Editar] [Eliminar]│ │
-│ │ María Gómez  28999888  [Blanca]  2024-09  │ │
+│ │ María Gómez  28999888  [blanco]  2024-09  │ │
 │ │ Lucas Fern.  33444555  [Violeta] 2019-06  │ │
 │ └────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────┘
@@ -173,10 +183,10 @@ Toggles que guardan al instante. `Cuenta p/ progreso` define si ese tipo suma pa
 │ Clases requeridas para pasar al siguiente        │
 │ ┌─────────────────────────────────────────────┐│
 │ │ Tramo                Requeridas    Acción    ││
-│ │ [Blanca] → [Azul]    [  150  ]    [Guardar]  ││
+│ │ [blanco] → [Azul]    [  150  ]    [Guardar]  ││
 │ │ [Azul] → [Violeta]   [  200  ]    [Guardar]  ││
 │ │ [Violeta] → [Marrón] [  200  ]    [Guardar]  ││
-│ │ [Marrón] → [Negra]   [  250  ]    [Guardar]  ││
+│ │ [Marrón] → [negro]   [  250  ]    [Guardar]  ││
 │ └─────────────────────────────────────────────┘│
 ```
 

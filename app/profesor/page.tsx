@@ -1,5 +1,8 @@
+import Link from "next/link";
+import { UserPlus } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
+import { Button } from "@/components/ui/button";
 import { isMockMode } from "@/lib/config";
 import { listClassTypes } from "@/lib/data/class-types";
 import { listStudents } from "@/lib/data/students";
@@ -51,7 +54,12 @@ export default async function ProfesorPage({
             {isMockMode() ? " · datos de prueba (sin Supabase)" : ""}
           </p>
         </div>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" render={<Link href="/solicitudes" />}>
+            <UserPlus className="size-3.5" /> Solicitudes
+          </Button>
+          <LogoutButton />
+        </div>
       </div>
 
       <ProfesorClient

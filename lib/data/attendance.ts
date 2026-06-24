@@ -29,7 +29,7 @@ export async function listPresentes(
           attendanceId: a.id,
           studentId: a.student_id,
           nombre: s?.nombre ?? "—",
-          cinturon_actual: s?.cinturon_actual ?? "blanca",
+          cinturon_actual: s?.cinturon_actual ?? "blanco",
           hora: a.hora,
         };
       })
@@ -54,7 +54,7 @@ export async function listPresentes(
     attendanceId: r.id,
     studentId: r.students?.id ?? "",
     nombre: r.students?.nombre ?? "—",
-    cinturon_actual: r.students?.cinturon_actual ?? "blanca",
+    cinturon_actual: r.students?.cinturon_actual ?? "blanco",
     hora: r.hora,
   }));
 }

@@ -1,17 +1,35 @@
 "use server";
 
-import { checkIn, type CheckInOk, type CheckInErr } from "@/lib/data/checkin";
+import { requireRole } from "@/lib/auth";
+import {
+  eligibleClassesNow,
+  checkInScan,
+  type EligibleOk,
+  type EligibleErr,
+  type CheckInOk,
+  type CheckInErr,
+} from "@/lib/data/checkin";
 
-// Acción pública del kiosko (anon, sin login). La validación de token + DNI
-// ocurre dentro de checkIn / la RPC check_in.
-export async function checkInAction(
-  academyToken: string,
-  dni: string,
+// El alumno logueado escanea el QR de la academia. Estas acciones exigen sesión.
+// admin/profesor pueden abrir la pantalla, pero el check-in real necesita una
+// ficha de alumno vinculada (lo valida checkInScan / la RPC).
+
+export async function eligibleClassesAction(
+  qrToken: string,
+): Promise<EligibleOk | EligibleErr> {
+  await requireRole("alumno", "admin", "profesor");
+  const token = qrToken.trim();
+  if (!token) return { ok: false, error: "QR vacío" };
+  return eligibleClassesNow(token);
+}
+
+export async function checkInScanAction(
+  qrToken: string,
   classTypeId: string,
 ): Promise<CheckInOk | CheckInErr> {
-  const clean = dni.trim();
-  if (!/^\d{6,10}$/.test(clean))
-    return { ok: false, error: "DNI inválido (6 a 10 dígitos)." };
-  if (!classTypeId) return { ok: false, error: "Elegí el tipo de clase." };
-  return checkIn(academyToken, clean, classTypeId);
+  await requireRole("alumno", "admin", "profesor");
+  const token = qrToken.trim();
+  if (!token) return { ok: false, error: "QR vacío" };
+  if (!classTypeId) return { ok: false, error: "Elegí la clase." };
+  return checkInScan(token, classTypeId);
 }

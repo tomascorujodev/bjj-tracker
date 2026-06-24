@@ -8,7 +8,7 @@ create extension if not exists "pgcrypto";  -- gen_random_uuid()
 -- Enums
 -- ─────────────────────────────────────────────────────────────
 do $$ begin
-  create type belt_color as enum ('blanca', 'azul', 'violeta', 'marron', 'negra');
+  create type belt_color as enum ('blanco', 'azul', 'violeta', 'marron', 'negro');
 exception when duplicate_object then null; end $$;
 
 do $$ begin
@@ -33,7 +33,7 @@ create table if not exists public.students (
   dni             text not null unique,
   nombre          text not null,
   foto_url        text,
-  cinturon_actual belt_color not null default 'blanca',
+  cinturon_actual belt_color not null default 'blanco',
   fecha_inicio    date not null default current_date,
   created_at      timestamptz not null default now()
 );

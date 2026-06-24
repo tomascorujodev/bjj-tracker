@@ -3,11 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { devBypassRole } from "@/lib/config";
 import type { Database } from "./types";
 
-// Rutas protegidas y el rol que admiten. /checkin y / son públicas.
+// Rutas protegidas y el rol que admiten. Solo / y /login son públicas.
 const ROUTE_ROLES: Record<string, ReadonlyArray<string>> = {
   "/admin": ["admin"],
   "/profesor": ["admin", "profesor"],
   "/alumno": ["alumno", "admin", "profesor"],
+  "/eventos": ["alumno", "admin", "profesor"],
+  "/checkin": ["alumno", "admin", "profesor"],
+  "/solicitudes": ["admin", "profesor"],
+  "/pendiente": ["alumno", "admin", "profesor"],
 };
 
 // Refresca la sesión de Supabase y hace una verificación optimista de rol.

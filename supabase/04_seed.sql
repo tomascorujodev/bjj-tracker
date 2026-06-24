@@ -15,24 +15,26 @@ on conflict (nombre) do nothing;
 
 -- Clases requeridas por tramo de cinturón (ajustar a la academia).
 insert into public.belt_config (cinturon_desde, cinturon_hasta, clases_requeridas) values
-  ('blanca',  'azul',    150),
+  ('blanco',  'azul',    150),
   ('azul',    'violeta', 200),
   ('violeta', 'marron',  200),
-  ('marron',  'negra',   250)
+  ('marron',  'negro',   250)
 on conflict (cinturon_desde) do nothing;
 
 -- ─────────────────────────────────────────────────────────────
--- Primer admin (manual): crear el usuario en Auth y luego ligar el perfil.
+-- Cuentas (requiere 07_enrollment.sql ya aplicado).
 --
+-- Con 07, al crear un usuario en Auth un trigger le crea su fila en public.users
+-- como alumno PENDIENTE. Los alumnos se auto-registran desde /registro y el staff
+-- los acepta en /solicitudes (ahí se crea/vincula su ficha en students).
+--
+-- Primer admin (manual, una vez):
 -- 1) Supabase Dashboard → Authentication → Users → Add user (email + password).
--- 2) Copiar su UUID y correr (reemplazando los valores):
+--    (El trigger crea su fila en public.users como alumno/pendiente.)
+-- 2) Promoverlo a admin:
+--    update public.users set rol = 'admin', estado = 'activo' where email = '<email>';
 --
---    insert into public.users (id, rol, email)
---    values ('<uuid-del-auth-user>', 'admin', '<email>');
---
--- Para un alumno: crear su fila en students, crear el auth user, y luego:
---    insert into public.users (id, rol, student_id, email)
---    values ('<uuid>', 'alumno', '<student_id>', '<email>');
+-- Profesor: igual que el admin pero rol = 'profesor'.
 -- ─────────────────────────────────────────────────────────────
 
 -- Ver el qr_token de la academia para imprimir el QR del kiosko:
