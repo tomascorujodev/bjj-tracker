@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   Table,
   TableBody,
@@ -36,18 +37,6 @@ function Row({
       const res = await setPagadoAction(eventId, ins.id, v);
       if (!res.ok) {
         setPagado(!v);
-        toast.error(res.error ?? "Error");
-      }
-    });
-  }
-
-  function remove() {
-    startTransition(async () => {
-      const res = await removeEnrollmentAction(eventId, ins.id);
-      if (res.ok) {
-        toast.success("Inscripción quitada");
-        onRemoved(ins.id);
-      } else {
         toast.error(res.error ?? "Error");
       }
     });
@@ -86,15 +75,32 @@ function Row({
         </div>
       </TableCell>
       <TableCell className="text-right">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-destructive"
-          onClick={remove}
-          disabled={pending}
-        >
-          Quitar
-        </Button>
+        <ConfirmDialog
+          trigger={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive"
+              disabled={pending}
+            >
+              Quitar
+            </Button>
+          }
+          title="Quitar inscripción"
+          description={`¿Quitar a ${ins.nombre} de este evento?`}
+          confirmLabel="Quitar"
+          pendingLabel="Quitando…"
+          onConfirm={async () => {
+            const res = await removeEnrollmentAction(eventId, ins.id);
+            if (res.ok) {
+              toast.success("Inscripción quitada");
+              onRemoved(ins.id);
+            } else {
+              toast.error(res.error ?? "Error");
+            }
+            return res.ok;
+          }}
+        />
       </TableCell>
     </TableRow>
   );

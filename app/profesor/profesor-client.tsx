@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -101,14 +102,6 @@ export function ProfesorClient({
       } else {
         toast.error(res.error ?? "Error");
       }
-    });
-  }
-
-  function remove(attendanceId: string, nombre: string) {
-    startTransition(async () => {
-      const res = await removePresenteAction(attendanceId);
-      if (res.ok) toast.success(`${nombre} quitado de la lista`);
-      else toast.error(res.error ?? "Error");
     });
   }
 
@@ -217,14 +210,24 @@ export function ProfesorClient({
                       <ProgressCell p={p.progress} />
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={pending}
-                        onClick={() => remove(p.attendanceId, p.nombre)}
-                      >
-                        Quitar
-                      </Button>
+                      <ConfirmDialog
+                        trigger={
+                          <Button variant="outline" size="sm" disabled={pending}>
+                            Quitar
+                          </Button>
+                        }
+                        title="Quitar presente"
+                        description={`¿Quitar a ${p.nombre} de la lista de presentes de esta clase?`}
+                        confirmLabel="Quitar"
+                        pendingLabel="Quitando…"
+                        onConfirm={async () => {
+                          const res = await removePresenteAction(p.attendanceId);
+                          if (res.ok)
+                            toast.success(`${p.nombre} quitado de la lista`);
+                          else toast.error(res.error ?? "Error");
+                          return res.ok;
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))

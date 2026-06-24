@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth";
 import {
   createClassType,
   updateClassType,
+  deleteClassType,
   type ClassTypePatch,
 } from "@/lib/data/class-types";
 
@@ -45,5 +46,20 @@ export async function updateClassTypeAction(
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
+  }
+}
+
+export async function deleteClassTypeAction(id: string): Promise<ActionResult> {
+  await requireRole("admin");
+  try {
+    await deleteClassType(id);
+    revalidatePath("/admin/clases");
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      error:
+        "No se puede eliminar: el tipo tiene asistencias registradas. Desactivalo en vez de borrarlo.",
+    };
   }
 }

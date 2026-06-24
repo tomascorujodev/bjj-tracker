@@ -49,3 +49,14 @@ export async function updateClassType(
   const { error } = await sb.from("class_types").update(patch).eq("id", id);
   if (error) throw new Error(error.message);
 }
+
+export async function deleteClassType(id: string): Promise<void> {
+  if (isMockMode()) {
+    const i = mockClassTypes.findIndex((x) => x.id === id);
+    if (i >= 0) mockClassTypes.splice(i, 1);
+    return;
+  }
+  const sb = await createClient();
+  const { error } = await sb.from("class_types").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}

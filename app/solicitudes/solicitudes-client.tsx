@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import type { PendingRequest } from "@/lib/data/enrollment";
 import { approveAction, rejectAction } from "./actions";
 
@@ -39,14 +40,6 @@ function RequestRow({ req }: { req: PendingRequest }) {
     });
   }
 
-  function reject() {
-    startTransition(async () => {
-      const res = await rejectAction(req.id);
-      if (res.ok) toast.success("Solicitud rechazada");
-      else toast.error(res.error ?? "Error");
-    });
-  }
-
   return (
     <Card data-pending={pending ? "" : undefined} className="data-[pending]:opacity-60">
       <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
@@ -57,9 +50,23 @@ function RequestRow({ req }: { req: PendingRequest }) {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={reject} disabled={pending}>
-            <X className="size-4" /> Rechazar
-          </Button>
+          <ConfirmDialog
+            trigger={
+              <Button variant="outline" size="sm" disabled={pending}>
+                <X className="size-4" /> Rechazar
+              </Button>
+            }
+            title="Rechazar solicitud"
+            description={`¿Rechazar la solicitud de ${req.nombre ?? "este alumno"}? No podrá acceder a la app.`}
+            confirmLabel="Rechazar"
+            pendingLabel="Rechazando…"
+            onConfirm={async () => {
+              const res = await rejectAction(req.id);
+              if (res.ok) toast.success("Solicitud rechazada");
+              else toast.error(res.error ?? "Error");
+              return res.ok;
+            }}
+          />
           <Button size="sm" onClick={approve} disabled={pending}>
             <Check className="size-4" /> Aceptar
           </Button>

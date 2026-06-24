@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   Select,
   SelectContent,
@@ -95,13 +96,6 @@ function Row({ row, nombre }: { row: ClassScheduleRow; nombre: string }) {
     });
   }
 
-  function remove() {
-    startTransition(async () => {
-      const res = await deleteScheduleAction(row.id);
-      if (!res.ok) toast.error(res.error ?? "Error");
-    });
-  }
-
   return (
     <TableRow data-pending={pending ? "" : undefined} className="data-[pending]:opacity-60">
       <TableCell>{DIAS[row.dia_semana]}</TableCell>
@@ -116,15 +110,26 @@ function Row({ row, nombre }: { row: ClassScheduleRow; nombre: string }) {
         />
       </TableCell>
       <TableCell className="text-right">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground hover:text-destructive"
-          onClick={remove}
-          aria-label="Eliminar horario"
-        >
-          <Trash2 className="size-4" />
-        </Button>
+        <ConfirmDialog
+          trigger={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-destructive"
+              aria-label="Eliminar horario"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          }
+          title="Eliminar horario"
+          description={`¿Eliminar ${nombre} · ${DIAS[row.dia_semana]} ${row.hora_inicio.slice(0, 5)}? No se puede deshacer.`}
+          onConfirm={async () => {
+            const res = await deleteScheduleAction(row.id);
+            if (res.ok) toast.success("Horario eliminado");
+            else toast.error(res.error ?? "Error");
+            return res.ok;
+          }}
+        />
       </TableCell>
     </TableRow>
   );
