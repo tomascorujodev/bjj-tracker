@@ -9,6 +9,7 @@ const SECTIONS = [
   { href: "/admin/clases", label: "Tipos de clase" },
   { href: "/admin/horarios", label: "Horarios" },
   { href: "/admin/cinturones", label: "Cinturones" },
+  { href: "/admin/profesores", label: "Profesores" },
   { href: "/admin/eventos", label: "Eventos" },
   { href: "/admin/qr", label: "QR Academia" },
   { href: "/solicitudes", label: "Solicitudes" },

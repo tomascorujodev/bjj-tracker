@@ -7,6 +7,7 @@ import type { AcademyRow } from "@/lib/data/academy";
 import type { EventRow } from "@/lib/data/events";
 import type { ClassScheduleRow } from "@/lib/data/schedule";
 import type { PendingRequest } from "@/lib/data/enrollment";
+import type { StaffMember } from "@/lib/data/staff";
 
 function uid() {
   return crypto.randomUUID();
@@ -204,4 +205,9 @@ export const mockSchedule: ClassScheduleRow[] = [
 export const mockPendingRequests: PendingRequest[] = [
   { id: uid(), email: "pedro.nuevo@mail.com", nombre: "Pedro Nuevo", dni: "40222111" },
   { id: uid(), email: "ana.lopez@mail.com", nombre: "Ana López", dni: "41333000" },
+];
+
+// ── Profesores (creados por el admin) ─────────────────────────
+export const mockProfesores: StaffMember[] = [
+  { id: uid(), email: "profe@mail.com", nombre: "Carlos Profe", dni: "27888777" },
 ];

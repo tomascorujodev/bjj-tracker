@@ -79,6 +79,32 @@ export async function registerAction(
   redirect("/pendiente");
 }
 
+export type ChangePasswordState = { error?: string };
+
+// Cambio de contraseña obligatorio al primer ingreso (profesor con contraseña temporal).
+export async function changePasswordAction(
+  _prev: ChangePasswordState,
+  formData: FormData,
+): Promise<ChangePasswordState> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 6)
+    return { error: "La contraseña debe tener al menos 6 caracteres." };
+  if (password !== confirm) return { error: "Las contraseñas no coinciden." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+
+  const { error: e2 } = await supabase.rpc("mark_password_changed");
+  if (e2) return { error: e2.message };
+
+  redirect(homeFor(user.rol));
+}
+
 export async function logoutAction(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();

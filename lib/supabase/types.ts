@@ -81,6 +81,7 @@ type UserRow = {
   email: string;
   nombre: string | null;
   dni: string | null;
+  must_change_password: boolean;
 };
 type UserInsert = {
   id: string;
@@ -90,6 +91,7 @@ type UserInsert = {
   email: string;
   nombre?: string | null;
   dni?: string | null;
+  must_change_password?: boolean;
 };
 
 type EventRow = {
@@ -299,6 +301,10 @@ export type Database = {
       };
       reject_user: {
         Args: { p_user_id: string };
+        Returns: undefined;
+      };
+      mark_password_changed: {
+        Args: Record<never, never>;
         Returns: undefined;
       };
       enroll_event: {

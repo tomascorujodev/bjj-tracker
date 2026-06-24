@@ -9,6 +9,7 @@ export type CurrentUser = {
   rol: UserRol;
   estado: UserEstado;
   studentId: string | null;
+  mustChangePassword: boolean;
 };
 
 // Devuelve el usuario autenticado + su perfil/rol, o null si no hay sesión.
@@ -22,6 +23,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       rol: bypass,
       estado: "activo",
       studentId: null,
+      mustChangePassword: false,
     };
   }
 
@@ -33,7 +35,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("rol, estado, student_id, email")
+    .select("rol, estado, student_id, email, must_change_password")
     .eq("id", user.id)
     .single();
   if (!profile) return null;
@@ -44,6 +46,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     rol: profile.rol,
     estado: profile.estado,
     studentId: profile.student_id,
+    mustChangePassword: profile.must_change_password,
   };
 }
 
@@ -52,6 +55,8 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function requireRole(...roles: UserRol[]): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  // Contraseña temporal: obligar a cambiarla antes de usar nada.
+  if (user.mustChangePassword) redirect("/cambiar-password");
   // Alumno aún no aprobado (o rechazado): no accede a ninguna funcionalidad.
   if (user.rol === "alumno" && user.estado !== "activo") redirect("/pendiente");
   if (roles.length > 0 && !roles.includes(user.rol)) redirect("/");

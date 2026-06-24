@@ -3,11 +3,11 @@ import type { BeltColor } from "@/lib/supabase/types";
 export const BELTS: BeltColor[] = ["blanco", "azul", "violeta", "marron", "negro"];
 
 export const BELT_LABEL: Record<BeltColor, string> = {
-  blanco: "blanco",
+  blanco: "Blanco",
   azul: "Azul",
   violeta: "Violeta",
   marron: "Marrón",
-  negro: "negro",
+  negro: "Negro",
 };
 
 // Clases Tailwind para el chip de cinturón.
