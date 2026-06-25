@@ -59,7 +59,7 @@ export async function registerAction(
   const password = String(formData.get("password") ?? "");
 
   if (!nombre) return { error: "Ingresá tu nombre." };
-  if (!/^\d{6,10}$/.test(dni)) return { error: "DNI inválido (6 a 10 dígitos)." };
+  if (!/^\d{6,8}$/.test(dni)) return { error: "DNI inválido (6 a 8 dígitos)." };
   if (!email) return { error: "Ingresá tu email." };
   if (password.length < 6)
     return { error: "La contraseña debe tener al menos 6 caracteres." };

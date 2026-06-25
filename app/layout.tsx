@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BJJ Tracker",
+  title: "Climent Club",
   description: "Sistema de asistencia y progreso para academias de BJJ",
+  icons: { icon: "/images/climent-club-icon.png" },
 };
 
 export default function RootLayout({

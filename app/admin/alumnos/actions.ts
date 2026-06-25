@@ -20,7 +20,7 @@ function parseStudent(formData: FormData): StudentInput | string {
   const fecha = String(formData.get("fecha_inicio") ?? "").trim();
 
   if (!dni) return "El DNI es obligatorio.";
-  if (!/^\d{6,10}$/.test(dni)) return "El DNI debe tener entre 6 y 10 dígitos.";
+  if (!/^\d{6,8}$/.test(dni)) return "El DNI debe tener entre 6 y 8 dígitos.";
   if (!nombre) return "El nombre es obligatorio.";
   if (!BELTS.includes(cinturon as BeltColor)) return "Cinturón inválido.";
   if (!fecha || Number.isNaN(Date.parse(fecha)))

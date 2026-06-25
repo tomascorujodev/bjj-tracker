@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,14 @@ export default async function Home() {
           <span className="bg-chart-3 size-1.5 rounded-full" />
           Asistencia y progreso para tu academia
         </div>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">BJJ Tracker</h1>
+        <Image
+          src="/images/climent-club-logo.png"
+          alt="Climent Club"
+          width={320}
+          height={44}
+          priority
+          className="mx-auto h-12 w-auto"
+        />
         <p className="text-muted-foreground mx-auto max-w-md text-balance">
           Controlá presentes, seguí el progreso de cada cinturón y dejá que tus
           alumnos hagan check-in solos.

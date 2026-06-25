@@ -17,8 +17,8 @@ export async function createProfesorAction(
 
   if (!nombre) return { ok: false, error: "Ingresá el nombre." };
   if (!email) return { ok: false, error: "Ingresá el email." };
-  if (!/^\d{6,10}$/.test(documento))
-    return { ok: false, error: "Documento inválido (6 a 10 dígitos)." };
+  if (!/^\d{6,8}$/.test(documento))
+    return { ok: false, error: "Documento inválido (6 a 8 dígitos)." };
 
   try {
     await createProfesor({ nombre, email, documento });

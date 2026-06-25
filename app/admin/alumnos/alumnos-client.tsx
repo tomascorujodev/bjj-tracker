@@ -76,7 +76,7 @@ function StudentForm({
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="dni">DNI</Label>
-        <Input id="dni" name="dni" defaultValue={student?.dni} inputMode="numeric" />
+        <Input id="dni" name="dni" defaultValue={student?.dni} inputMode="numeric" maxLength={8} pattern="\d{6,8}" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="nombre">Nombre</Label>
@@ -108,6 +108,11 @@ function StudentForm({
           name="fecha_inicio"
           type="date"
           defaultValue={student?.fecha_inicio}
+          onClick={(e) => {
+            try {
+              e.currentTarget.showPicker();
+            } catch {}
+          }}
         />
       </div>
       <DialogFooter>

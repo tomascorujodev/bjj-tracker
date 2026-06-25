@@ -107,8 +107,8 @@ export function ProfesorClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end gap-4">
-        <div className="space-y-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div className="flex flex-col gap-2">
           <Label>Tipo de clase</Label>
           <Select value={tipo} onValueChange={(v) => navigate({ tipo: String(v) })}>
             <SelectTrigger className="w-48">
@@ -125,17 +125,22 @@ export function ProfesorClient({
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="fecha">Fecha</Label>
           <Input
             id="fecha"
             type="date"
             value={fecha}
             onChange={(e) => navigate({ fecha: e.target.value })}
+            onClick={(e) => {
+              try {
+                e.currentTarget.showPicker();
+              } catch {}
+            }}
             className="w-44"
           />
         </div>
-        <div className="ml-auto">
+        <div className="sm:ml-auto">
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger
               render={<Button disabled={!tipo || ausentes.length === 0}>Agregar presente</Button>}

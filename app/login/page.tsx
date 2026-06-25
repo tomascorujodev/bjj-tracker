@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { isMockMode } from "@/lib/config";
 import { devBypassRole } from "@/lib/config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,10 +39,14 @@ export default async function LoginPage({
     <main className="flex flex-1 items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">BJJ Tracker</h1>
-          <p className="text-muted-foreground text-sm">
-            Ingresá para gestionar tu academia
-          </p>
+          <Image
+            src="/images/climent-club-logo.png"
+            alt="Climent Club"
+            width={232}
+            height={32}
+            priority
+            className="mx-auto h-8 w-auto"
+          />
         </div>
         <Card>
           <CardHeader>

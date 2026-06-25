@@ -24,6 +24,8 @@ export function RegisterForm() {
           id="dni"
           name="dni"
           inputMode="numeric"
+          maxLength={8}
+          pattern="\d{6,8}"
           placeholder="Solo números"
           required
         />

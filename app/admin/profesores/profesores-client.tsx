@@ -38,7 +38,7 @@ export function ProfesoresClient({ profesores }: { profesores: StaffMember[] }) 
     });
   }
 
-  const ready = nombre.trim() && email.trim() && /^\d{6,10}$/.test(documento);
+  const ready = nombre.trim() && email.trim() && /^\d{6,8}$/.test(documento);
 
   return (
     <div className="space-y-6">
@@ -71,9 +71,10 @@ export function ProfesoresClient({ profesores }: { profesores: StaffMember[] }) 
             id="documento"
             name="documento"
             inputMode="numeric"
+            maxLength={8}
             placeholder="Solo números"
             value={documento}
-            onChange={(e) => setDocumento(e.target.value)}
+            onChange={(e) => setDocumento(e.target.value.replace(/\D/g, "").slice(0, 8))}
           />
         </div>
         <Button type="submit" disabled={pending || !ready}>

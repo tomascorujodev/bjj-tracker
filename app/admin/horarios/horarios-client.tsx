@@ -166,9 +166,9 @@ function AddForm({ tipos }: { tipos: Tipo[] }) {
   return (
     <form
       onSubmit={add}
-      className="bg-card grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
+      className="bg-card grid grid-cols-2 items-end gap-4 rounded-xl border p-4 md:grid-cols-5"
     >
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label>Clase</Label>
         <Select value={typeId} onValueChange={(v) => setTypeId(v as string)}>
           <SelectTrigger className="w-full">
@@ -188,7 +188,7 @@ function AddForm({ tipos }: { tipos: Tipo[] }) {
         </Select>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label>Día</Label>
         <Select value={dia} onValueChange={(v) => setDia(v as string)}>
           <SelectTrigger className="w-full">
@@ -208,27 +208,37 @@ function AddForm({ tipos }: { tipos: Tipo[] }) {
         </Select>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="inicio">Inicio</Label>
         <Input
           id="inicio"
           type="time"
           value={inicio}
           onChange={(e) => setInicio(e.target.value)}
+          onClick={(e) => {
+            try {
+              e.currentTarget.showPicker();
+            } catch {}
+          }}
         />
       </div>
 
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="fin">Fin</Label>
         <Input
           id="fin"
           type="time"
           value={fin}
           onChange={(e) => setFin(e.target.value)}
+          onClick={(e) => {
+            try {
+              e.currentTarget.showPicker();
+            } catch {}
+          }}
         />
       </div>
 
-      <Button type="submit" disabled={pending || !ready}>
+      <Button type="submit" disabled={pending || !ready} className="col-span-2 md:col-span-1">
         Agregar
       </Button>
     </form>

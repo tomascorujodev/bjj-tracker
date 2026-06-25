@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { getCurrentUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangePasswordForm } from "./change-password-form";
@@ -13,7 +14,14 @@ export default async function CambiarPasswordPage() {
     <main className="flex flex-1 items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">BJJ Tracker</h1>
+          <Image
+            src="/images/climent-club-logo.png"
+            alt="Climent Club"
+            width={232}
+            height={32}
+            priority
+            className="mx-auto h-8 w-auto"
+          />
           <p className="text-muted-foreground text-sm">
             Primer ingreso: elegí tu contraseña
           </p>
