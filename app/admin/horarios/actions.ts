@@ -42,6 +42,39 @@ export async function createScheduleAction(
   }
 }
 
+export async function updateScheduleAction(
+  id: string,
+  input: ScheduleInput,
+): Promise<ActionResult> {
+  await requireRole("admin");
+
+  if (!id) return { ok: false, error: "Horario inválido." };
+  if (!input.class_type_id) return { ok: false, error: "Elegí la clase." };
+  if (
+    typeof input.dia_semana !== "number" ||
+    input.dia_semana < 0 ||
+    input.dia_semana > 6
+  )
+    return { ok: false, error: "Día inválido." };
+  if (!input.hora_inicio || !input.hora_fin)
+    return { ok: false, error: "Completá las horas." };
+  if (input.hora_fin <= input.hora_inicio)
+    return { ok: false, error: "La hora de fin debe ser posterior al inicio." };
+
+  try {
+    await updateSchedule(id, {
+      class_type_id: input.class_type_id,
+      dia_semana: input.dia_semana,
+      hora_inicio: input.hora_inicio,
+      hora_fin: input.hora_fin,
+    });
+    revalidatePath("/admin/horarios");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
 export async function toggleScheduleAction(
   id: string,
   activo: boolean,
