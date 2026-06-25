@@ -66,13 +66,13 @@ export function HorariosClient({
 
   return (
     <div className="space-y-6">
+      <AddForm tipos={tipos} />
+
       <WeeklyGrid
         schedule={schedule}
         nombreDe={nombreDe}
         onSelect={setSelected}
       />
-
-      <AddForm tipos={tipos} />
 
       <Dialog
         open={selected !== null}
@@ -266,16 +266,6 @@ function WeeklyGrid({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-end">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground hover:text-foreground"
-          onClick={() => downloadScheduleImage(activos, horas, nombreDe)}
-        >
-          <Download className="size-4" /> Descargar
-        </Button>
-      </div>
       <div className="overflow-x-auto rounded-md border">
       <Table>
         <TableHeader>
@@ -321,6 +311,16 @@ function WeeklyGrid({
           ))}
         </TableBody>
       </Table>
+      </div>
+      <div className="flex justify-end">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={() => downloadScheduleImage(activos, horas, nombreDe)}
+        >
+          <Download className="size-4" /> Descargar
+        </Button>
       </div>
     </div>
   );
